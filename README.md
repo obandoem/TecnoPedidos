@@ -1,12 +1,12 @@
 # Documentación funcional del prototipo TecnoPedidos
 
 **Curso:** SC-403 — Desarrollo de Aplicaciones y Patrones  
-**Grupo:** 4  
 **Versión:** 1.0  
 **Fecha:** Octubre 2026  
 **Estado:** Documentación
 **Figma Link:** https://coral-badger-68682688.figma.site/
-
+**Grupo:** 4  
+**Colaboradores:** Roberto Araujo Elizondo, Jose Julian Jaime Potosme, Emeth Isaac Obando Mora, Alberth Ramses Vivas Chavarria
 
 ---
 
