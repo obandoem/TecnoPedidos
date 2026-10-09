@@ -2,10 +2,11 @@
 
 **Curso:** SC-403 — Desarrollo de Aplicaciones y Patrones  
 **Grupo:** 4  
-**Tipo de documento:** Análisis funcional y documentación de interfaces  
 **Versión:** 1.0  
-**Fecha:** 9 de octubre de 2026  
-**Estado:** Documentación del prototipo navegable actual
+**Fecha:** Octubre 2026  
+**Estado:** Documentación
+**Figma Link:** https://coral-badger-68682688.figma.site/
+
 
 ---
 
@@ -93,8 +94,6 @@ Se conservan los identificadores **P01–P10** usados para organizar el alcance 
 
 ## 3. Fichas de pantallas
 
-> **Nota sobre las capturas:** no fue posible adjuntar capturas reales porque el servidor supervisado del prototipo no fue accesible desde las herramientas de captura de este entorno. No se generaron imágenes sustitutas. La sección 7 contiene la lista exacta de capturas que deben obtenerse desde el panel de vista previa.
-
 ### 3.1 P01 — Inicio de sesión
 
 **Objetivo:** representar el acceso del equipo y ofrecer entrada directa a cada perfil de demostración y al seguimiento público.
@@ -103,7 +102,7 @@ Se conservan los identificadores **P01–P10** usados para organizar el alcance 
 
 **Cómo se llega:** es la pantalla inicial. También aparece al pulsar la tarjeta del usuario para cerrar la sesión o al usar **Acceso de equipo** desde P10.
 
-**Captura requerida:** Figura 1. *Pantalla de inicio de sesión de TecnoPedidos con credenciales y accesos de demostración.*
+**Figura 1. *Pantalla de inicio de sesión de TecnoPedidos con credenciales y accesos de demostración.*
 
 **Campos visibles**
 
