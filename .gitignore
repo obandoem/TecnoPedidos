@@ -1,0 +1,9 @@
+target/
+.nb-gradle/
+nbproject/private/
+.idea/
+*.iml
+.env
+
+# Configuracion local con credenciales (no se versiona)
+src/main/resources/application-local.properties

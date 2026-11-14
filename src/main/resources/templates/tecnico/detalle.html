@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(${pedido.codigo})}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('misPedidos')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/tecnico/pedidos}" th:text="#{menu.misPedidos}">Mis pedidos</a></li>
+                    <li class="breadcrumb-item active" th:text="${pedido.codigo}">PED-0001</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <h2 class="mb-0 me-2" th:text="${pedido.codigo}">PED-0001</h2>
+                <th:block th:replace="~{layout/plantilla :: estadoBadge(${pedido.estado})}"></th:block>
+            </div>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <div class="row g-3">
+                <div class="col-lg-7">
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <div class="text-secondary text-uppercase small fw-semibold" th:text="#{cliente.nombre}">Cliente</div>
+                            <div class="fw-semibold" th:text="${pedido.cliente.nombre}"></div>
+                            <div class="small text-secondary" th:text="${pedido.cliente.telefono}"></div>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li th:each="d : ${pedido.detalles}" class="list-group-item d-flex justify-content-between">
+                                <span>
+                                    <span class="fw-semibold" th:text="${d.producto.nombre}"></span>
+                                    <code class="small ms-1" th:text="${d.producto.codigo}"></code>
+                                </span>
+                                <span class="text-secondary" th:text="'× ' + ${d.cantidad}"></span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-semibold py-3" th:text="#{pedido.historial}">Historial</div>
+                        <div class="card-body">
+                            <div th:replace="~{layout/plantilla :: historial(${pedido})}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registrar avance (HU-09) -->
+                <div class="col-lg-5">
+                    <div class="card shadow-sm border-0" th:if="${pedido.siguienteEstadoTecnico != null}">
+                        <div class="card-body">
+                            <h6 class="fw-semibold" th:text="#{tecnico.registrarAvance}">Registrar avance</h6>
+                            <form th:action="@{/tecnico/pedidos/{id}/avance(id=${pedido.idPedido})}" method="post">
+                                <input type="hidden" name="nuevoEstado" th:value="${pedido.siguienteEstadoTecnico}">
+
+                                <div class="d-flex align-items-center gap-2 mb-3 small">
+                                    <th:block th:replace="~{layout/plantilla :: estadoBadge(${pedido.estado})}"></th:block>
+                                    <i class="bi bi-arrow-right text-secondary"></i>
+                                    <th:block th:replace="~{layout/plantilla :: estadoBadge(${pedido.siguienteEstadoTecnico})}"></th:block>
+                                </div>
+
+                                <label class="form-label" th:text="#{tecnico.comentarioPublico}">Comentario para el cliente</label>
+                                <textarea name="comentarioPublico" class="form-control mb-1" rows="2" maxlength="500" required></textarea>
+                                <div class="form-text mb-3" th:text="#{tecnico.comentarioPublicoAyuda}">
+                                    El cliente podrá ver este comentario.</div>
+
+                                <label class="form-label">
+                                    <span th:text="#{tecnico.observacionInterna}">Observación interna</span>
+                                    <span class="text-secondary small" th:text="#{comun.opcional}">(opcional)</span>
+                                </label>
+                                <textarea name="observacionInterna" class="form-control mb-1" rows="2" maxlength="500"></textarea>
+                                <div class="form-text mb-3" th:text="#{tecnico.observacionInternaAyuda}">
+                                    Solo visible para el equipo.</div>
+
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-send me-1"></i><span th:text="#{tecnico.guardarAvance}">Guardar avance</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success" th:if="${pedido.siguienteEstadoTecnico == null}">
+                        <i class="bi bi-check-circle me-1"></i>
+                        <span th:text="#{tecnico.terminado}">Atención técnica terminada. El vendedor registrará la entrega.</span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

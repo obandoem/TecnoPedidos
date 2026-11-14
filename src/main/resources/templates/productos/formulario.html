@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head('Producto')}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('inventario')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+    <main class="p-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a th:href="@{/productos}" th:text="#{menu.inventario}">Inventario</a></li>
+                <li class="breadcrumb-item active"
+                    th:text="${producto.idProducto == null} ? #{producto.nuevo} : #{producto.editar}">Producto</li>
+            </ol>
+        </nav>
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-8">
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h4 class="mb-0"
+                            th:text="${producto.idProducto == null} ? 'Nuevo producto' : 'Editar producto'">
+                            Producto
+                        </h4>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <form th:action="@{/productos/guardar}" th:object="${producto}" method="post">
+
+                            <input type="hidden" th:field="*{idProducto}">
+
+                            <!-- Errores de reglas de negocio -->
+                            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                                <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="codigo" class="form-label fw-semibold"
+                                           th:text="#{producto.codigo}">Código</label>
+                                    <input type="text" id="codigo" th:field="*{codigo}"
+                                           class="form-control text-uppercase" maxlength="30" required
+                                           th:classappend="${#fields.hasErrors('codigo')} ? 'is-invalid'"
+                                           placeholder="TEC-001">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('codigo')}"
+                                         th:errors="*{codigo}"></div>
+                                </div>
+
+                                <div class="col-md-8 mb-3">
+                                    <label for="nombre" class="form-label fw-semibold"
+                                           th:text="#{producto.nombre}">Producto</label>
+                                    <input type="text" id="nombre" th:field="*{nombre}"
+                                           class="form-control" maxlength="120" required
+                                           th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'"
+                                           placeholder="Ej: Teclado mecánico RGB">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
+                                         th:errors="*{nombre}"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label fw-semibold">Descripción</label>
+                                <textarea id="descripcion" th:field="*{descripcion}"
+                                          class="form-control" rows="3" maxlength="500"
+                                          th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid'"></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}"
+                                     th:errors="*{descripcion}"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="categoria" class="form-label fw-semibold"
+                                           th:text="#{producto.categoria}">Categoría</label>
+                                    <select id="categoria" th:field="*{categoria.idCategoria}"
+                                            class="form-select" required>
+                                        <option value="">Seleccione una categoría</option>
+                                        <option th:each="cat : ${categorias}"
+                                                th:value="${cat.idCategoria}"
+                                                th:text="${cat.nombre}"></option>
+                                    </select>
+                                    <div class="text-danger small mt-1"
+                                         th:if="${#fields.hasErrors('categoria')}"
+                                         th:errors="*{categoria}"></div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="precio" class="form-label fw-semibold">Precio (₡)</label>
+                                    <input type="number" id="precio" th:field="*{precio}"
+                                           class="form-control" min="0" max="99999999.99" step="0.01" required
+                                           th:classappend="${#fields.hasErrors('precio')} ? 'is-invalid'"
+                                           placeholder="18500.00">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('precio')}"
+                                         th:errors="*{precio}"></div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="stockMinimo" class="form-label fw-semibold"
+                                           th:text="#{producto.stockMinimo}">Stock mínimo</label>
+                                    <input type="number" id="stockMinimo" th:field="*{stockMinimo}"
+                                           class="form-control" min="0" step="1" required
+                                           th:classappend="${#fields.hasErrors('stockMinimo')} ? 'is-invalid'"
+                                           placeholder="5">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('stockMinimo')}"
+                                         th:errors="*{stockMinimo}"></div>
+                                </div>
+                            </div>
+
+                            <!-- El stock no se edita aqui (HU-04 esc. 3 y HU-23 esc. 2) -->
+                            <div class="alert alert-info">
+                                <span th:if="*{idProducto == null}">
+                                    El producto se crea con stock 0. Las existencias se agregan
+                                    registrando una <strong>entrada</strong> desde el inventario.
+                                </span>
+                                <span th:unless="*{idProducto == null}">
+                                    Stock actual: <strong th:text="*{stock}"></strong>.
+                                    Para corregirlo, registre un movimiento de inventario.
+                                </span>
+                            </div>
+
+                            <div th:if="${#lists.isEmpty(categorias)}" class="alert alert-warning">
+                                Debe registrar al menos una categoría activa antes de guardar un producto.
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <a th:href="@{/productos}" class="btn btn-secondary"
+                                   th:text="#{comun.cancelar}">Cancelar</a>
+                                <button type="submit" class="btn btn-primary"
+                                        th:disabled="${#lists.isEmpty(categorias)}"
+                                        th:text="#{comun.guardar}">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+    </div>
+</div>
+
+    <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(#{login.titulo})}"></head>
+
+<!-- Inicio de sesion (P01 / HU-01) -->
+<body class="bg-white">
+<div class="container-fluid">
+    <div class="row min-vh-100">
+
+        <!-- Panel de marca (pantallas grandes) -->
+        <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-between text-white p-5 bg-dark">
+            <span class="bg-primary rounded-3 d-inline-flex align-items-center justify-content-center"
+                  style="width: 44px; height: 44px;">
+                <i class="bi bi-grid-fill fs-5"></i>
+            </span>
+
+            <div>
+                <div class="text-uppercase text-info small fw-semibold mb-2" th:text="#{login.etiqueta}">
+                    Gestión conectada</div>
+                <h1 class="display-5 fw-semibold mb-3" th:utext="#{login.lema}">
+                    Tecnología en orden.<br>Negocios en movimiento.</h1>
+                <p class="text-white-50 mb-0" style="max-width: 460px;"
+                   th:text="#{login.descripcion}">
+                    Inventario, pedidos y servicio técnico en una sola plataforma.</p>
+            </div>
+
+            <div class="small text-white-50">© 2026 TecnoPedidos · SC-403 · Universidad Fidélitas</div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center p-4">
+            <div class="w-100" style="max-width: 400px;">
+
+                <div class="d-flex justify-content-end mb-5">
+                    <th:block th:replace="~{layout/plantilla :: idioma}"></th:block>
+                </div>
+
+                <div class="text-uppercase text-primary small fw-semibold" th:text="#{login.bienvenida}">
+                    Bienvenido de nuevo</div>
+                <h2 class="mb-1" th:text="#{login.titulo}">Ingresa a tu cuenta</h2>
+                <p class="text-secondary" th:text="#{login.subtitulo}">Gestiona tu operación desde un solo lugar.</p>
+
+                <!-- Mensaje generico: no revela si el correo existe (HU-01 esc. 2) -->
+                <div th:if="${param.error != null}" class="alert alert-danger py-2">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    <span th:text="#{login.error}">Correo o contraseña incorrectos.</span>
+                </div>
+                <div th:if="${param.logout != null}" class="alert alert-success py-2">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <span th:text="#{login.salida}">Sesión cerrada correctamente.</span>
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="mb-3">
+                        <label for="correo" class="form-label fw-semibold" th:text="#{login.correo}">Correo electrónico</label>
+                        <input type="email" id="correo" name="correo" class="form-control"
+                               required autofocus autocomplete="username" placeholder="usuario@empresa.cr">
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold" th:text="#{login.password}">Contraseña</label>
+                        <input type="password" id="password" name="password" class="form-control"
+                               required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" th:text="#{login.ingresar}">Ingresar</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

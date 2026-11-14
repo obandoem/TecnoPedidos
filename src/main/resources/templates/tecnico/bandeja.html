@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(#{menu.misPedidos})}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('misPedidos')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <!-- Bandeja del tecnico (P07 / HU-25) -->
+            <div class="mb-4">
+                <h2 class="mb-1" th:text="#{menu.misPedidos}">Mis pedidos</h2>
+                <p class="text-secondary mb-0" th:text="#{tecnico.subtitulo}">Pedidos asignados a usted para atención técnica.</p>
+            </div>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <!-- Filtro por estado (HU-25 esc. 2) -->
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a th:href="@{/tecnico/pedidos}" class="btn btn-sm"
+                   th:classappend="${estado == null} ? 'btn-primary' : 'btn-outline-secondary'"
+                   th:text="#{tecnico.todos}">Todos</a>
+                <a th:each="e : ${estadosBandeja}" th:href="@{/tecnico/pedidos(estado=${e})}" class="btn btn-sm"
+                   th:classappend="${estado == e} ? 'btn-primary' : 'btn-outline-secondary'"
+                   th:text="#{${'estado.' + e}}">Estado</a>
+            </div>
+
+            <!-- Bandeja vacia (HU-25 esc. 4) -->
+            <div th:if="${#lists.isEmpty(pedidos)}" class="card shadow-sm border-0">
+                <div class="card-body text-center text-secondary py-5">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    <span th:text="#{tecnico.vacia}">No tiene pedidos asignados.</span>
+                </div>
+            </div>
+
+            <div class="row g-3" th:unless="${#lists.isEmpty(pedidos)}">
+                <div class="col-md-6 col-xl-4" th:each="p : ${pedidos}">
+                    <a th:href="@{/tecnico/pedidos/{id}(id=${p.idPedido})}"
+                       class="card shadow-sm border-0 h-100 text-decoration-none text-body">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="fw-bold" th:text="${p.codigo}">PED-0001</span>
+                                <th:block th:replace="~{layout/plantilla :: estadoBadge(${p.estado})}"></th:block>
+                            </div>
+                            <div class="fw-semibold" th:text="${p.cliente.nombre}">Cliente</div>
+                            <div class="small text-secondary"
+                                 th:text="${#temporals.format(p.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head('Movimientos')}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('inventario')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+    <main class="p-4">
+
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/productos}" th:text="#{menu.inventario}">Inventario</a></li>
+                    <li class="breadcrumb-item active" th:text="#{menu.movimientos}">Movimientos</li>
+                </ol>
+            </nav>
+            <h2 th:text="#{movimiento.titulo}">Movimientos de inventario</h2>
+            <p class="text-muted mb-0">Cada cambio de existencias queda registrado con su motivo y fecha.</p>
+        </div>
+
+        <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+        <div class="row g-4">
+
+            <!-- Registro de entrada o ajuste (HU-05) -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0" th:text="#{movimiento.registrar}">Registrar movimiento</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/inventario/movimientos}" method="post">
+
+                            <div class="mb-3">
+                                <label class="form-label" th:text="#{producto.nombre}">Producto</label>
+                                <select name="idProducto" class="form-select" required>
+                                    <option value="">Seleccione un producto</option>
+                                    <option th:each="p : ${productos}"
+                                            th:value="${p.idProducto}"
+                                            th:text="${p.codigo} + ' - ' + ${p.nombre} + ' (stock ' + ${p.stock} + ')'"
+                                            th:selected="${idProducto != null and idProducto == p.idProducto}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" th:text="#{movimiento.tipo}">Tipo</label>
+                                <select name="tipo" class="form-select" required>
+                                    <option th:each="tipo : ${tiposMovimiento}"
+                                            th:value="${tipo}" th:text="${tipo.descripcion}"></option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" th:text="#{movimiento.cantidad}">Cantidad</label>
+                                <input type="number" name="cantidad" class="form-control"
+                                       min="1" step="1" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" th:text="#{movimiento.motivo}">Motivo</label>
+                                <input type="text" name="motivo" class="form-control"
+                                       maxlength="255" required placeholder="Ej: Conteo físico">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100"
+                                    th:text="#{comun.guardar}">Guardar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Historial</h5>
+
+                        <form th:action="@{/inventario/movimientos}" method="get" class="d-flex gap-2">
+                            <select name="idProducto" class="form-select form-select-sm">
+                                <option value="">Todos los productos</option>
+                                <option th:each="p : ${productos}"
+                                        th:value="${p.idProducto}"
+                                        th:text="${p.codigo} + ' - ' + ${p.nombre}"
+                                        th:selected="${idProducto != null and idProducto == p.idProducto}">
+                                </option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary"
+                                    th:text="#{comun.buscar}">Buscar</button>
+                        </form>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th th:text="#{movimiento.fecha}">Fecha</th>
+                                        <th th:text="#{producto.nombre}">Producto</th>
+                                        <th th:text="#{movimiento.tipo}">Tipo</th>
+                                        <th class="text-end" th:text="#{movimiento.cantidad}">Cantidad</th>
+                                        <th class="text-end" th:text="#{movimiento.anterior}">Anterior</th>
+                                        <th class="text-end" th:text="#{movimiento.resultante}">Resultante</th>
+                                        <th th:text="#{movimiento.motivo}">Motivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(movimientos)}">
+                                        <td colspan="7" class="text-center text-muted py-4"
+                                            th:text="#{comun.sinResultados}">Sin registros</td>
+                                    </tr>
+
+                                    <tr th:each="m : ${movimientos}">
+                                        <td class="small" th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                                        <td>
+                                            <code th:text="${m.producto.codigo}"></code>
+                                            <span th:text="${m.producto.nombre}"></span>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${m.tipo.signo > 0} ? 'bg-success' : 'bg-danger'"
+                                                  th:text="${m.tipo.descripcion}"></span>
+                                        </td>
+                                        <td class="text-end"
+                                            th:text="${(m.tipo.signo > 0 ? '+' : '-') + m.cantidad}"></td>
+                                        <td class="text-end" th:text="${m.stockAnterior}"></td>
+                                        <td class="text-end fw-semibold" th:text="${m.stockResultante}"></td>
+                                        <td class="small" th:text="${m.motivo}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    </div>
+</div>
+
+    <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

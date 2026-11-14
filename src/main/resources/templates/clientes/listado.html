@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(#{menu.clientes})}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('clientes')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <!-- Encabezado (P04) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h2 class="mb-1" th:text="#{menu.clientes}">Clientes</h2>
+                    <p class="text-secondary mb-0" th:text="#{cliente.subtitulo}">Consulta y registra los clientes de la empresa.</p>
+                </div>
+                <a th:href="@{/clientes/nuevo}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i><span th:text="#{cliente.nuevo}">Nuevo cliente</span>
+                </a>
+            </div>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <!-- Busqueda (HU-22 esc. 1) -->
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body">
+                    <form th:action="@{/clientes}" method="get" class="row g-2">
+                        <div class="col-md-9">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                <input type="text" name="texto" class="form-control" th:value="${texto}"
+                                       th:placeholder="#{cliente.buscar}" placeholder="Buscar por nombre o identificación">
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-primary flex-grow-1"
+                                    th:text="#{comun.buscar}">Buscar</button>
+                            <a th:href="@{/clientes}" class="btn btn-outline-secondary" th:title="#{comun.limpiar}">
+                                <i class="bi bi-x-lg"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="text-uppercase small text-secondary">
+                                <th class="ps-3" th:text="#{cliente.nombre}">Cliente</th>
+                                <th th:text="#{cliente.identificacion}">Identificación</th>
+                                <th th:text="#{cliente.correo}">Correo</th>
+                                <th th:text="#{cliente.telefono}">Teléfono</th>
+                                <th th:text="#{comun.estado}">Estado</th>
+                                <th class="text-end pe-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(clientes)}">
+                                <td colspan="6" class="text-center text-secondary py-5"
+                                    th:text="#{comun.sinResultados}">Sin registros</td>
+                            </tr>
+                            <tr th:each="c : ${clientes}">
+                                <td class="ps-3 fw-semibold" th:text="${c.nombre}"></td>
+                                <td><code th:text="${c.identificacion}"></code></td>
+                                <td class="text-secondary" th:text="${c.correo != null} ? ${c.correo} : '—'"></td>
+                                <td class="text-secondary" th:text="${c.telefono != null and c.telefono != ''} ? ${c.telefono} : '—'"></td>
+                                <td>
+                                    <span th:if="${c.activo}" class="badge rounded-pill bg-success-subtle text-success-emphasis"
+                                          th:text="'● ' + #{comun.activo}">Activo</span>
+                                    <span th:unless="${c.activo}" class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis"
+                                          th:text="'● ' + #{comun.inactivo}">Inactivo</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <a class="btn btn-sm btn-light" th:href="@{/clientes/editar/{id}(id=${c.idCliente})}"
+                                       th:title="#{comun.editar}"><i class="bi bi-pencil"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

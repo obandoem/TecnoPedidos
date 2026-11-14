@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(#{pedido.nuevo})}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('pedidos')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/pedidos}" th:text="#{menu.pedidos}">Pedidos</a></li>
+                    <li class="breadcrumb-item active" th:text="#{pedido.nuevo}">Nuevo pedido</li>
+                </ol>
+            </nav>
+            <h2 class="mb-1" th:text="#{pedido.nuevo}">Nuevo pedido</h2>
+            <p class="text-secondary" th:text="#{pedido.nuevoSub}">Seleccione el cliente, agregue los productos y confirme el pedido.</p>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <div class="row g-3">
+
+                <!-- Paso 1 y 2: cliente, asistencia y productos (HU-06, HU-07) -->
+                <div class="col-lg-5">
+                    <form id="formPedido" th:action="@{/pedidos/nuevo}" method="post">
+
+                        <div class="card shadow-sm border-0 mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-semibold mb-3">
+                                    <span class="badge rounded-pill text-bg-primary me-1">1</span>
+                                    <span th:text="#{pedido.paso1}">Cliente y servicio</span>
+                                </h6>
+
+                                <label for="idCliente" class="form-label" th:text="#{cliente.nombre}">Cliente</label>
+                                <select id="idCliente" name="idCliente" class="form-select mb-3">
+                                    <option value="" th:text="#{pedido.seleccioneCliente}">Seleccione un cliente</option>
+                                    <option th:each="c : ${clientes}" th:value="${c.idCliente}"
+                                            th:text="${c.nombre} + ' (' + ${c.identificacion} + ')'"
+                                            th:selected="${carrito.idCliente != null and carrito.idCliente == c.idCliente}"></option>
+                                </select>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="requiereAsistencia"
+                                           name="requiereAsistencia" value="true" th:checked="${carrito.requiereAsistencia}">
+                                    <label class="form-check-label" for="requiereAsistencia" th:text="#{pedido.requiereAsistencia}">
+                                        Requiere asistencia técnica (revisión o instalación)</label>
+                                </div>
+                                <div class="small text-secondary mt-2">
+                                    <a th:href="@{/clientes/nuevo}" class="text-decoration-none">
+                                        <i class="bi bi-person-plus me-1"></i><span th:text="#{cliente.nuevo}">Nuevo cliente</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <h6 class="fw-semibold mb-3">
+                                    <span class="badge rounded-pill text-bg-primary me-1">2</span>
+                                    <span th:text="#{pedido.paso2}">Agregar productos</span>
+                                </h6>
+
+                                <label for="idProducto" class="form-label" th:text="#{producto.nombre}">Producto</label>
+                                <select id="idProducto" name="idProducto" class="form-select mb-3">
+                                    <option value="" th:text="#{pedido.seleccioneProducto}">Seleccione un producto</option>
+                                    <option th:each="p : ${productos}" th:value="${p.idProducto}"
+                                            th:disabled="${p.stock == 0}"
+                                            th:text="${p.codigo} + ' - ' + ${p.nombre} + ' · ₡' + ${#numbers.formatDecimal(p.precio, 1, 'COMMA', 2, 'POINT')} + ' · stock ' + ${p.stock}"></option>
+                                </select>
+
+                                <div class="d-flex gap-2 align-items-end">
+                                    <div style="max-width: 120px;">
+                                        <label for="cantidad" class="form-label" th:text="#{movimiento.cantidad}">Cantidad</label>
+                                        <input type="number" id="cantidad" name="cantidad" class="form-control" min="1" step="1" value="1">
+                                    </div>
+                                    <button type="submit" name="accion" value="agregar" class="btn btn-outline-primary flex-grow-1">
+                                        <i class="bi bi-cart-plus me-1"></i><span th:text="#{pedido.agregar}">Agregar al pedido</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Paso 3: revisar y confirmar -->
+                <div class="col-lg-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h6 class="fw-semibold mb-3">
+                                <span class="badge rounded-pill text-bg-primary me-1">3</span>
+                                <span th:text="#{pedido.paso3}">Revisar y confirmar</span>
+                            </h6>
+
+                            <div th:if="${#lists.isEmpty(lineas)}" class="text-center text-secondary py-4">
+                                <i class="bi bi-cart fs-2 d-block mb-2"></i>
+                                <span th:text="#{pedido.carritoVacio}">Todavía no hay productos en el pedido.</span>
+                            </div>
+
+                            <div th:unless="${#lists.isEmpty(lineas)}" class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead class="table-light">
+                                        <tr class="text-uppercase small text-secondary">
+                                            <th th:text="#{producto.nombre}">Producto</th>
+                                            <th class="text-end" th:text="#{pedido.precioUnitario}">Precio</th>
+                                            <th style="width: 170px;" th:text="#{movimiento.cantidad}">Cantidad</th>
+                                            <th class="text-end" th:text="#{pedido.subtotal}">Subtotal</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="l : ${lineas}">
+                                            <td>
+                                                <div class="fw-semibold" th:text="${l.producto.nombre}"></div>
+                                                <code class="small" th:text="${l.producto.codigo}"></code>
+                                                <div th:if="${l.cantidad > l.producto.stock}" class="small text-danger">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    <span th:text="#{pedido.stockInsuficiente(${l.producto.stock})}">Stock insuficiente</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-end"
+                                                th:text="'₡' + ${#numbers.formatDecimal(l.precioUnitario, 1, 'COMMA', 2, 'POINT')}"></td>
+                                            <td>
+                                                <!-- Editar la cantidad antes de confirmar (HU-07 esc. 3) -->
+                                                <form th:action="@{/pedidos/nuevo/linea/{id}/actualizar(id=${l.producto.idProducto})}"
+                                                      method="post" class="input-group input-group-sm">
+                                                    <input type="number" name="cantidad" class="form-control" min="1" step="1"
+                                                           th:value="${l.cantidad}">
+                                                    <button type="submit" class="btn btn-outline-secondary" th:title="#{pedido.actualizar}">
+                                                        <i class="bi bi-arrow-repeat"></i></button>
+                                                </form>
+                                            </td>
+                                            <td class="text-end fw-semibold"
+                                                th:text="'₡' + ${#numbers.formatDecimal(l.subtotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                                            <td class="text-end">
+                                                <form th:action="@{/pedidos/nuevo/linea/{id}/eliminar(id=${l.producto.idProducto})}" method="post">
+                                                    <button type="submit" class="btn btn-sm btn-light text-danger" th:title="#{pedido.quitar}">
+                                                        <i class="bi bi-trash"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Total calculado en el servidor (HU-07 esc. 2) -->
+                            <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                <span class="text-secondary" th:text="#{pedido.total}">Total</span>
+                                <span class="fs-4 fw-bold"
+                                      th:text="'₡' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">₡0.00</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between gap-2 mt-3">
+                                <form th:action="@{/pedidos/nuevo/descartar}" method="post">
+                                    <button type="submit" class="btn btn-outline-secondary"
+                                            th:disabled="${#lists.isEmpty(lineas)}" th:text="#{pedido.descartar}">Descartar</button>
+                                </form>
+                                <!-- Envia el formulario del cliente y los productos con la accion "confirmar" -->
+                                <button type="submit" form="formPedido" name="accion" value="confirmar"
+                                        class="btn btn-primary" th:disabled="${#lists.isEmpty(lineas)}">
+                                    <i class="bi bi-check-lg me-1"></i><span th:text="#{pedido.confirmar}">Confirmar pedido</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

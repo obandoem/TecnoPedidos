@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head('Bajo stock')}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('bajoStock')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <!-- Encabezado (P08) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h2 class="mb-1" th:text="#{bajoStock.titulo}">Productos con bajo stock</h2>
+                    <p class="text-secondary mb-0" th:text="#{bajoStock.subtitulo}">
+                        Productos activos con existencias iguales o inferiores a su stock mínimo.</p>
+                </div>
+                <a th:href="@{/inventario/bajo-stock}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-clockwise me-1"></i><span th:text="#{bajoStock.actualizar}">Actualizar reporte</span>
+                </a>
+            </div>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <!-- Resumen por prioridad -->
+            <div class="row g-3 mb-3" th:unless="${#lists.isEmpty(productos)}">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="text-uppercase text-secondary small fw-semibold" th:text="#{bajoStock.critico}">Crítico</div>
+                            <div class="fs-3 fw-bold text-danger"
+                                 th:text="${#lists.size(productos.?[prioridad == 'CRITICO'])}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="text-uppercase text-secondary small fw-semibold" th:text="#{bajoStock.advertencia}">Advertencia</div>
+                            <div class="fs-3 fw-bold text-warning-emphasis"
+                                 th:text="${#lists.size(productos.?[prioridad == 'ADVERTENCIA'])}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+
+                <div th:if="${#lists.isEmpty(productos)}" class="card-body">
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-check-circle me-1"></i>
+                        <span th:text="#{bajoStock.vacio}">No hay productos en el mínimo o por debajo de él.</span>
+                    </div>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(productos)}" class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="text-uppercase small text-secondary">
+                                <th class="ps-3" th:text="#{producto.nombre}">Producto</th>
+                                <th th:text="#{producto.categoria}">Categoría</th>
+                                <th class="text-end" th:text="#{producto.stockActual}">Stock actual</th>
+                                <th class="text-end" th:text="#{producto.minimo}">Mínimo</th>
+                                <th class="text-end" th:text="#{bajoStock.faltante}">Faltante</th>
+                                <th th:text="#{bajoStock.prioridad}">Prioridad</th>
+                                <th class="text-end pe-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${productos}">
+                                <td class="ps-3">
+                                    <div class="fw-semibold" th:text="${p.nombre}"></div>
+                                    <code class="small" th:text="${p.codigo}"></code>
+                                </td>
+                                <td class="text-secondary" th:text="${p.categoria.nombre}"></td>
+                                <td class="text-end fw-semibold text-danger" th:text="${p.stock}"></td>
+                                <td class="text-end text-secondary" th:text="${p.stockMinimo}"></td>
+                                <td class="text-end fw-semibold" th:text="${p.faltante}"></td>
+                                <td>
+                                    <span th:if="${p.prioridad == 'CRITICO'}"
+                                          class="badge rounded-pill bg-danger-subtle text-danger-emphasis"
+                                          th:text="'● ' + #{bajoStock.critico}">Crítico</span>
+                                    <span th:if="${p.prioridad == 'ADVERTENCIA'}"
+                                          class="badge rounded-pill bg-warning-subtle text-warning-emphasis"
+                                          th:text="'● ' + #{bajoStock.advertencia}">Advertencia</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <a class="btn btn-sm btn-outline-primary" th:if="${esAdmin}"
+                                       th:href="@{/inventario/movimientos(idProducto=${p.idProducto})}">
+                                        <i class="bi bi-plus-lg me-1"></i><span th:text="#{bajoStock.registrarEntrada}">Registrar entrada</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p class="small text-secondary mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                <span th:text="#{bajoStock.criterio}">Crítico: agotado o con la mitad del mínimo o menos. Advertencia: en el mínimo o por debajo.</span>
+            </p>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(#{menu.pedidos})}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('pedidos')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <!-- Encabezado (P06) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h2 class="mb-1" th:text="#{menu.pedidos}">Pedidos</h2>
+                    <p class="text-secondary mb-0" th:text="#{pedido.subtitulo}">Consulta los pedidos y su avance.</p>
+                </div>
+                <a th:href="@{/pedidos/nuevo}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i><span th:text="#{pedido.nuevo}">Nuevo pedido</span>
+                </a>
+            </div>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <!-- Filtro por estado -->
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body">
+                    <form th:action="@{/pedidos}" method="get" class="row g-2 align-items-center">
+                        <div class="col-sm-6 col-lg-4">
+                            <select name="estado" class="form-select">
+                                <option value="" th:text="#{inventario.estadoTodos}">Estado: Todos</option>
+                                <option th:each="e : ${estados}" th:value="${e}"
+                                        th:text="#{${'estado.' + e}}" th:selected="${estado == e}"></option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-primary flex-grow-1"
+                                    th:text="#{comun.buscar}">Buscar</button>
+                            <a th:href="@{/pedidos}" class="btn btn-outline-secondary" th:title="#{comun.limpiar}">
+                                <i class="bi bi-x-lg"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="text-uppercase small text-secondary">
+                                <th class="ps-3" th:text="#{pedido.pedido}">Pedido</th>
+                                <th th:text="#{pedido.fecha}">Fecha</th>
+                                <th th:text="#{cliente.nombre}">Cliente</th>
+                                <th th:text="#{pedido.tecnico}">Técnico</th>
+                                <th th:text="#{comun.estado}">Estado</th>
+                                <th class="text-end" th:text="#{pedido.total}">Total</th>
+                                <th class="text-end pe-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(pedidos)}">
+                                <td colspan="7" class="text-center text-secondary py-5"
+                                    th:text="#{comun.sinResultados}">Sin registros</td>
+                            </tr>
+                            <tr th:each="p : ${pedidos}">
+                                <td class="ps-3 fw-semibold">
+                                    <span th:text="${p.codigo}">PED-0001</span>
+                                    <i th:if="${p.requiereAsistencia}" class="bi bi-tools text-secondary ms-1"
+                                       th:title="#{pedido.conAsistencia}"></i>
+                                </td>
+                                <td class="text-secondary small"
+                                    th:text="${#temporals.format(p.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td th:text="${p.cliente.nombre}"></td>
+                                <td class="text-secondary" th:text="${p.tecnico != null} ? ${p.tecnico.nombre} : '—'"></td>
+                                <td><th:block th:replace="~{layout/plantilla :: estadoBadge(${p.estado})}"></th:block></td>
+                                <td class="text-end fw-semibold"
+                                    th:text="'₡' + ${#numbers.formatDecimal(p.total, 1, 'COMMA', 2, 'POINT')}"></td>
+                                <td class="text-end pe-3">
+                                    <a class="btn btn-sm btn-light" th:href="@{/pedidos/{id}(id=${p.idPedido})}"
+                                       th:title="#{pedido.verDetalle}"><i class="bi bi-chevron-right"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(#{denegado.titulo})}"></head>
+
+<body class="bg-light">
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card shadow-sm border-0 text-center p-4" style="max-width: 440px;">
+        <div class="card-body">
+            <span class="bg-danger-subtle text-danger-emphasis rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                  style="width: 64px; height: 64px;">
+                <i class="bi bi-shield-lock fs-2"></i>
+            </span>
+            <h3 th:text="#{denegado.titulo}">Acceso denegado</h3>
+            <p class="text-secondary" th:text="#{denegado.mensaje}">
+                Su rol no tiene permiso para esta función.</p>
+            <a th:href="@{/}" class="btn btn-primary">
+                <i class="bi bi-house me-1"></i><span th:text="#{denegado.volver}">Volver al inicio</span>
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

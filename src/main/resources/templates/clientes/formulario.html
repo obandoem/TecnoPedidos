@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(#{menu.clientes})}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('clientes')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item"><a th:href="@{/clientes}" th:text="#{menu.clientes}">Clientes</a></li>
+                    <li class="breadcrumb-item active"
+                        th:text="${cliente.idCliente == null} ? #{cliente.nuevo} : #{comun.editar}">Cliente</li>
+                </ol>
+            </nav>
+
+            <div class="row justify-content-center">
+                <div class="col-md-9 col-lg-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h4 class="mb-0"
+                                th:text="${cliente.idCliente == null} ? #{cliente.nuevo} : #{cliente.editar}">Cliente</h4>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post">
+                                <input type="hidden" th:field="*{idCliente}">
+
+                                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                                    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <label for="identificacion" class="form-label fw-semibold"
+                                               th:text="#{cliente.identificacion}">Identificación</label>
+                                        <input type="text" id="identificacion" th:field="*{identificacion}"
+                                               class="form-control" maxlength="30" required placeholder="1-1111-1111"
+                                               th:classappend="${#fields.hasErrors('identificacion')} ? 'is-invalid'">
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('identificacion')}"
+                                             th:errors="*{identificacion}"></div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <label for="nombre" class="form-label fw-semibold"
+                                               th:text="#{cliente.nombre}">Cliente</label>
+                                        <input type="text" id="nombre" th:field="*{nombre}"
+                                               class="form-control" maxlength="120" required
+                                               th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'">
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
+                                             th:errors="*{nombre}"></div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <label for="correo" class="form-label fw-semibold">
+                                            <span th:text="#{cliente.correo}">Correo</span>
+                                            <span class="text-secondary fw-normal small" th:text="#{comun.opcional}">(opcional)</span>
+                                        </label>
+                                        <input type="email" id="correo" th:field="*{correo}"
+                                               class="form-control" maxlength="120"
+                                               th:classappend="${#fields.hasErrors('correo')} ? 'is-invalid'">
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('correo')}"
+                                             th:errors="*{correo}"></div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="telefono" class="form-label fw-semibold"
+                                               th:text="#{cliente.telefono}">Teléfono</label>
+                                        <input type="text" id="telefono" th:field="*{telefono}"
+                                               class="form-control" maxlength="30">
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a th:href="@{/clientes}" class="btn btn-outline-secondary"
+                                       th:text="#{comun.cancelar}">Cancelar</a>
+                                    <button type="submit" class="btn btn-primary" th:text="#{comun.guardar}">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

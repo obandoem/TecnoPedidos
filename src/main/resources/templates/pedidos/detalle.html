@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head(${pedido.codigo})}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('pedidos')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a th:href="@{/pedidos}" th:text="#{menu.pedidos}">Pedidos</a></li>
+                    <li class="breadcrumb-item active" th:text="${pedido.codigo}">PED-0001</li>
+                </ol>
+            </nav>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+                <h2 class="mb-0 me-2" th:text="${pedido.codigo}">PED-0001</h2>
+                <th:block th:replace="~{layout/plantilla :: estadoBadge(${pedido.estado})}"></th:block>
+                <span th:if="${pedido.requiereAsistencia}" class="badge rounded-pill text-bg-light border">
+                    <i class="bi bi-tools me-1"></i><span th:text="#{pedido.conAsistencia}">Con asistencia técnica</span>
+                </span>
+            </div>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <div class="row g-3">
+
+                <!-- Datos y lineas del pedido -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <div class="row g-3 small">
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="text-secondary text-uppercase fw-semibold" th:text="#{cliente.nombre}">Cliente</div>
+                                    <div class="fw-semibold" th:text="${pedido.cliente.nombre}"></div>
+                                    <div class="text-secondary" th:text="${pedido.cliente.identificacion}"></div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="text-secondary text-uppercase fw-semibold" th:text="#{pedido.fecha}">Fecha</div>
+                                    <div th:text="${#temporals.format(pedido.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="text-secondary text-uppercase fw-semibold" th:text="#{pedido.vendedor}">Vendedor</div>
+                                    <div th:text="${pedido.vendedor != null} ? ${pedido.vendedor.nombre} : '—'"></div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="text-secondary text-uppercase fw-semibold" th:text="#{pedido.tecnico}">Técnico</div>
+                                    <div th:text="${pedido.tecnico != null} ? ${pedido.tecnico.nombre} : '—'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr class="text-uppercase small text-secondary">
+                                        <th class="ps-3" th:text="#{producto.nombre}">Producto</th>
+                                        <th class="text-end" th:text="#{movimiento.cantidad}">Cantidad</th>
+                                        <th class="text-end" th:text="#{pedido.precioUnitario}">Precio</th>
+                                        <th class="text-end pe-3" th:text="#{pedido.subtotal}">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="d : ${pedido.detalles}">
+                                        <td class="ps-3">
+                                            <div class="fw-semibold" th:text="${d.producto.nombre}"></div>
+                                            <code class="small" th:text="${d.producto.codigo}"></code>
+                                        </td>
+                                        <td class="text-end" th:text="${d.cantidad}"></td>
+                                        <!-- Precio historico guardado en el pedido (HU-07 esc. 4) -->
+                                        <td class="text-end"
+                                            th:text="'₡' + ${#numbers.formatDecimal(d.precioUnitario, 1, 'COMMA', 2, 'POINT')}"></td>
+                                        <td class="text-end pe-3 fw-semibold"
+                                            th:text="'₡' + ${#numbers.formatDecimal(d.subtotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end text-secondary ps-3" th:text="#{pedido.total}">Total</td>
+                                        <td class="text-end pe-3 fs-5 fw-bold"
+                                            th:text="'₡' + ${#numbers.formatDecimal(pedido.total, 1, 'COMMA', 2, 'POINT')}"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-semibold py-3" th:text="#{pedido.historial}">Historial</div>
+                        <div class="card-body">
+                            <div th:replace="~{layout/plantilla :: historial(${pedido})}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones segun el rol y el estado -->
+                <div class="col-lg-4">
+
+                    <!-- Asignar o reasignar tecnico (HU-08) - administrador -->
+                    <div class="card shadow-sm border-0 mb-3" th:if="${esAdmin and pedido.asignable}">
+                        <div class="card-body">
+                            <h6 class="fw-semibold"
+                                th:text="${pedido.tecnico == null} ? #{pedido.asignarTecnico} : #{pedido.reasignarTecnico}">Asignar técnico</h6>
+                            <form th:action="@{/pedidos/{id}/asignar(id=${pedido.idPedido})}" method="post">
+                                <select name="idTecnico" class="form-select mb-2" required>
+                                    <option value="" th:text="#{pedido.seleccioneTecnico}">Seleccione un técnico</option>
+                                    <option th:each="t : ${tecnicos}" th:value="${t.idUsuario}" th:text="${t.nombre}"
+                                            th:selected="${pedido.tecnico != null and pedido.tecnico.idUsuario == t.idUsuario}"></option>
+                                </select>
+                                <input th:if="${pedido.tecnico != null}" type="text" name="motivo" class="form-control mb-2"
+                                       maxlength="200" required th:placeholder="#{pedido.motivoReasignacion}">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-person-check me-1"></i>
+                                    <span th:text="${pedido.tecnico == null} ? #{pedido.asignar} : #{pedido.reasignar}">Asignar</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Marcar listo: pedido sin asistencia (HU-26 esc. 1) -->
+                    <div class="card shadow-sm border-0 mb-3"
+                         th:if="${!pedido.requiereAsistencia and pedido.estado.name() == 'PENDIENTE'}">
+                        <div class="card-body">
+                            <h6 class="fw-semibold" th:text="#{pedido.preparacion}">Preparación</h6>
+                            <p class="small text-secondary" th:text="#{pedido.preparacionSub}">
+                                Confirme cuando el pedido esté preparado para entregar.</p>
+                            <form th:action="@{/pedidos/{id}/listo(id=${pedido.idPedido})}" method="post">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check2-circle me-1"></i><span th:text="#{pedido.marcarListo}">Marcar como listo</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Entrega (HU-26 esc. 3) -->
+                    <div class="card shadow-sm border-0 mb-3" th:if="${pedido.estado.name() == 'LISTO'}">
+                        <div class="card-body">
+                            <h6 class="fw-semibold" th:text="#{pedido.entrega}">Entrega</h6>
+                            <form th:action="@{/pedidos/{id}/entregar(id=${pedido.idPedido})}" method="post">
+                                <textarea name="comentario" class="form-control mb-2" rows="2" maxlength="500" required
+                                          th:placeholder="#{pedido.comentarioEntrega}"></textarea>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-bag-check me-1"></i><span th:text="#{pedido.registrarEntrega}">Registrar entrega</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Esperando al tecnico -->
+                    <div class="alert alert-info small"
+                         th:if="${pedido.requiereAsistencia and pedido.tecnico != null and pedido.siguienteEstadoTecnico != null}">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <span th:text="#{pedido.esperandoTecnico}">El técnico registra el avance hasta dejar el pedido listo.</span>
+                    </div>
+
+                    <!-- Cancelar (HU-24) - administrador -->
+                    <div class="card shadow-sm border-0 border-danger" th:if="${esAdmin and pedido.abierto}">
+                        <div class="card-body">
+                            <h6 class="fw-semibold text-danger" th:text="#{pedido.cancelar}">Cancelar pedido</h6>
+                            <p class="small text-secondary" th:text="#{pedido.cancelarSub}">
+                                Se devuelven las existencias de todos los productos.</p>
+                            <button type="button" class="btn btn-outline-danger w-100"
+                                    data-bs-toggle="modal" data-bs-target="#modalCancelar"
+                                    th:text="#{pedido.cancelar}">Cancelar pedido</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirmacion de cancelacion -->
+            <div class="modal fade" id="modalCancelar" tabindex="-1" th:if="${esAdmin and pedido.abierto}">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form th:action="@{/pedidos/{id}/cancelar(id=${pedido.idPedido})}" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title" th:text="#{pedido.cancelar}">Cancelar pedido</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label class="form-label" th:text="#{pedido.motivoCancelacion}">Motivo de la cancelación</label>
+                                <input type="text" name="motivo" class="form-control" maxlength="200" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                        th:text="#{comun.cerrar}">Cerrar</button>
+                                <button type="submit" class="btn btn-danger" th:text="#{pedido.cancelar}">Cancelar pedido</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

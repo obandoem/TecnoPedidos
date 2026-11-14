@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head('Categoría')}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('inventario')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+    <main class="p-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a th:href="@{/productos}" th:text="#{menu.inventario}">Inventario</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/categorias}" th:text="#{inventario.categorias}">Categorías</a></li>
+                <li class="breadcrumb-item active"
+                    th:text="${categoria.idCategoria == null} ? #{categoria.nueva} : #{comun.editar}">Categoría</li>
+            </ol>
+        </nav>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h4 class="mb-0"
+                            th:text="${categoria.idCategoria == null} ? 'Nueva categoría' : 'Editar categoría'">
+                            Categoría
+                        </h4>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <form th:action="@{/categorias/guardar}" th:object="${categoria}" method="post">
+
+                            <input type="hidden" th:field="*{idCategoria}">
+
+                            <!-- Errores de reglas de negocio -->
+                            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                                <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label fw-semibold"
+                                       th:text="#{categoria.nombre}">Nombre</label>
+                                <input type="text" id="nombre" th:field="*{nombre}"
+                                       class="form-control" maxlength="100" required
+                                       th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'"
+                                       placeholder="Ej: Periféricos">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
+                                     th:errors="*{nombre}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label fw-semibold"
+                                       th:text="#{categoria.descripcion}">Descripción</label>
+                                <textarea id="descripcion" th:field="*{descripcion}"
+                                          class="form-control" rows="3" maxlength="255"
+                                          th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid'"></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}"
+                                     th:errors="*{descripcion}"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <a th:href="@{/categorias}" class="btn btn-secondary"
+                                   th:text="#{comun.cancelar}">Cancelar</a>
+                                <button type="submit" class="btn btn-primary"
+                                        th:text="#{comun.guardar}">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+    </div>
+</div>
+
+    <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

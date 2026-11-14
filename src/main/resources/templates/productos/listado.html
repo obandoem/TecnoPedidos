@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head('Inventario')}"></head>
+
+<body class="bg-light">
+<div class="d-flex">
+
+    <aside th:replace="~{layout/plantilla :: sidebar('inventario')}"></aside>
+
+    <div class="flex-grow-1" style="min-width: 0;">
+        <header th:replace="~{layout/plantilla :: topbar}"></header>
+
+        <main class="p-4">
+
+            <!-- Encabezado (P03) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h2 class="mb-1" th:text="#{inventario.titulo}">Inventario</h2>
+                    <p class="text-secondary mb-0" th:text="#{inventario.subtitulo}">
+                        Consulta productos, precios y disponibilidad del catálogo.</p>
+                </div>
+                <button type="button" class="btn btn-primary" th:if="${esAdmin}"
+                        data-bs-toggle="offcanvas" data-bs-target="#nuevoProducto">
+                    <i class="bi bi-plus-lg me-1"></i><span th:text="#{producto.nuevo}">Nuevo producto</span>
+                </button>
+            </div>
+
+            <div th:replace="~{layout/plantilla :: mensajes}"></div>
+
+            <!-- Busqueda y filtros (HU-15) -->
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body">
+                    <form th:action="@{/productos}" method="get" class="row g-2 align-items-center">
+                        <div class="col-lg-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                <input type="text" name="texto" class="form-control" th:value="${texto}"
+                                       th:placeholder="#{inventario.buscar}" placeholder="Buscar por código o nombre">
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <select name="idCategoria" class="form-select">
+                                <option value="" th:text="#{inventario.todasCategorias}">Todas las categorías</option>
+                                <option th:each="cat : ${categorias}"
+                                        th:value="${cat.idCategoria}" th:text="${cat.nombre}"
+                                        th:selected="${idCategoria != null and idCategoria == cat.idCategoria}"></option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-lg-2">
+                            <select name="estado" class="form-select">
+                                <option value="" th:text="#{inventario.estadoTodos}">Estado: Todos</option>
+                                <option value="DISPONIBLE" th:selected="${estado == 'DISPONIBLE'}"
+                                        th:text="#{producto.disponible}">Disponible</option>
+                                <option value="BAJO_STOCK" th:selected="${estado == 'BAJO_STOCK'}"
+                                        th:text="#{producto.stockBajo}">Bajo stock</option>
+                                <option value="INACTIVO" th:selected="${estado == 'INACTIVO'}"
+                                        th:text="#{comun.inactivo}">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-primary flex-grow-1"
+                                    th:text="#{comun.buscar}">Buscar</button>
+                            <a th:href="@{/productos}" class="btn btn-outline-secondary" th:title="#{comun.limpiar}">
+                                <i class="bi bi-x-lg"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla de productos -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+                    <span class="fw-semibold">
+                        <span th:text="${#lists.size(productos)}">0</span>
+                        <span th:text="#{inventario.productos}">productos</span>
+                    </span>
+                    <div class="d-flex gap-2" th:if="${esAdmin}">
+                        <a th:href="@{/categorias}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-tags me-1"></i><span th:text="#{inventario.categorias}">Categorías</span>
+                        </a>
+                        <a th:href="@{/inventario/movimientos}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-left-right me-1"></i><span th:text="#{inventario.registrarMovimiento}">Registrar movimiento</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="text-uppercase small text-secondary">
+                                <th class="ps-3" th:text="#{producto.nombre}">Producto</th>
+                                <th th:text="#{producto.categoria}">Categoría</th>
+                                <th class="text-end" th:text="#{producto.precio}">Precio</th>
+                                <th class="text-end" th:text="#{producto.stockActual}">Stock actual</th>
+                                <th class="text-end" th:text="#{producto.minimo}">Mínimo</th>
+                                <th th:text="#{comun.estado}">Estado</th>
+                                <th class="text-end pe-3"></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(productos)}">
+                                <td colspan="7" class="text-center text-secondary py-5"
+                                    th:text="#{comun.sinResultados}">Sin registros</td>
+                            </tr>
+
+                            <tr th:each="producto : ${productos}"
+                                th:classappend="${!producto.activo} ? 'opacity-50'">
+
+                                <td class="ps-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="bg-body-secondary rounded-2 d-inline-flex align-items-center justify-content-center me-2"
+                                              style="width: 36px; height: 36px;"><i class="bi bi-box text-secondary"></i></span>
+                                        <div class="lh-sm">
+                                            <div class="fw-semibold" th:text="${producto.nombre}"></div>
+                                            <code class="small" th:text="${producto.codigo}"></code>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="text-secondary" th:text="${producto.categoria.nombre}"></td>
+
+                                <td class="text-end"
+                                    th:text="'₡' + ${#numbers.formatDecimal(producto.precio, 1, 'COMMA', 2, 'POINT')}"></td>
+
+                                <td class="text-end fw-semibold"
+                                    th:classappend="${producto.activo and producto.stockBajo} ? 'text-danger'"
+                                    th:text="${producto.stock}"></td>
+
+                                <td class="text-end text-secondary" th:text="${producto.stockMinimo}"></td>
+
+                                <!-- Estado del inventario -->
+                                <td>
+                                    <span th:if="${!producto.activo}"
+                                          class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis"
+                                          th:text="#{comun.inactivo}">Inactivo</span>
+                                    <th:block th:if="${producto.activo}">
+                                        <span th:if="${producto.stock == 0}"
+                                              class="badge rounded-pill bg-danger-subtle text-danger-emphasis"
+                                              th:text="'● ' + #{producto.agotado}">Agotado</span>
+                                        <span th:if="${producto.stock > 0 and producto.stockBajo}"
+                                              class="badge rounded-pill bg-danger-subtle text-danger-emphasis"
+                                              th:text="'● ' + #{producto.stockBajo}">Bajo stock</span>
+                                        <span th:if="${!producto.stockBajo}"
+                                              class="badge rounded-pill bg-success-subtle text-success-emphasis"
+                                              th:text="'● ' + #{producto.disponible}">Disponible</span>
+                                    </th:block>
+                                </td>
+
+                                <!-- Menu de acciones del producto -->
+                                <td class="text-end pe-3">
+                                    <div class="dropdown" th:if="${esAdmin}">
+                                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown"
+                                                data-bs-popper-config='{"strategy":"fixed"}'
+                                                th:title="#{comun.acciones}">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   th:href="@{/productos/editar/{id}(id=${producto.idProducto})}">
+                                                    <i class="bi bi-pencil me-2"></i><span th:text="#{comun.editar}">Editar</span>
+                                                </a>
+                                            </li>
+                                            <li th:if="${producto.activo}">
+                                                <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                                                        th:attr="data-bs-target=|#movimiento-${producto.idProducto}|">
+                                                    <i class="bi bi-arrow-left-right me-2"></i><span th:text="#{inventario.registrarMovimiento}">Registrar movimiento</span>
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   th:href="@{/inventario/movimientos(idProducto=${producto.idProducto})}">
+                                                    <i class="bi bi-clock-history me-2"></i><span th:text="#{producto.verMovimientos}">Ver movimientos</span>
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li th:if="${producto.activo}">
+                                                <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal"
+                                                        th:attr="data-bs-target=|#desactivar-${producto.idProducto}|">
+                                                    <i class="bi bi-slash-circle me-2"></i><span th:text="#{comun.desactivar}">Desactivar</span>
+                                                </button>
+                                            </li>
+                                            <li th:unless="${producto.activo}">
+                                                <form method="post"
+                                                      th:action="@{/productos/activar/{id}(id=${producto.idProducto})}">
+                                                    <button type="submit" class="dropdown-item text-success">
+                                                        <i class="bi bi-check-circle me-2"></i><span th:text="#{comun.activar}">Activar</span>
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Panel lateral: nuevo producto (HU-04) -->
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="nuevoProducto" th:if="${esAdmin}"
+                 style="--bs-offcanvas-width: 480px;">
+                <div class="offcanvas-header border-bottom">
+                    <div>
+                        <h5 class="offcanvas-title mb-0" th:text="#{producto.nuevo}">Nuevo producto</h5>
+                        <div class="small text-secondary" th:text="#{producto.nuevoSub}">Agrega un artículo al catálogo</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                </div>
+
+                <form th:action="@{/productos/guardar}" method="post" class="d-flex flex-column flex-grow-1">
+                    <div class="offcanvas-body">
+
+                        <div th:if="${#lists.isEmpty(categoriasActivas)}" class="alert alert-warning">
+                            Debe registrar al menos una categoría activa antes de crear un producto.
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-5">
+                                <label for="nuevoCodigo" class="form-label fw-semibold" th:text="#{producto.codigo}">Código</label>
+                                <input type="text" id="nuevoCodigo" name="codigo" class="form-control text-uppercase"
+                                       maxlength="30" required placeholder="TEC-001">
+                            </div>
+                            <div class="col-7">
+                                <label for="nuevoCategoria" class="form-label fw-semibold" th:text="#{producto.categoria}">Categoría</label>
+                                <select id="nuevoCategoria" name="categoria.idCategoria" class="form-select" required>
+                                    <option value="">Seleccionar</option>
+                                    <option th:each="cat : ${categoriasActivas}"
+                                            th:value="${cat.idCategoria}" th:text="${cat.nombre}"></option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="nuevoNombre" class="form-label fw-semibold" th:text="#{producto.nombre}">Producto</label>
+                                <input type="text" id="nuevoNombre" name="nombre" class="form-control"
+                                       maxlength="120" required placeholder="Ej: Teclado mecánico RGB">
+                            </div>
+                            <div class="col-6">
+                                <label for="nuevoPrecio" class="form-label fw-semibold">Precio (₡)</label>
+                                <input type="number" id="nuevoPrecio" name="precio" class="form-control"
+                                       min="0" max="99999999.99" step="0.01" required placeholder="18500.00">
+                            </div>
+                            <div class="col-6">
+                                <label for="nuevoMinimo" class="form-label fw-semibold" th:text="#{producto.stockMinimo}">Stock mínimo</label>
+                                <input type="number" id="nuevoMinimo" name="stockMinimo" class="form-control"
+                                       min="0" step="1" required placeholder="5">
+                            </div>
+                            <div class="col-12">
+                                <label for="nuevoDescripcion" class="form-label fw-semibold">Descripción</label>
+                                <textarea id="nuevoDescripcion" name="descripcion" class="form-control"
+                                          rows="3" maxlength="500"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- HU-04 esc. 3 -->
+                        <div class="alert alert-info small mt-3 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            El producto se crea con stock 0. Las existencias se agregan después
+                            con una <strong>entrada</strong> de inventario.
+                        </div>
+                    </div>
+
+                    <div class="border-top p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas"
+                                th:text="#{comun.cancelar}">Cancelar</button>
+                        <button type="submit" class="btn btn-primary"
+                                th:disabled="${#lists.isEmpty(categoriasActivas)}"
+                                th:text="#{producto.crear}">Crear producto</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modales por producto activo -->
+            <th:block th:each="producto : ${productos}" th:if="${esAdmin}">
+                <th:block th:if="${producto.activo}">
+
+                    <!-- Registrar entrada o ajuste (HU-05) -->
+                    <div class="modal fade" tabindex="-1" th:id="|movimiento-${producto.idProducto}|">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <form th:action="@{/inventario/movimientos}" method="post">
+                                    <input type="hidden" name="idProducto" th:value="${producto.idProducto}">
+
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" th:text="#{inventario.registrarMovimiento}">Registrar movimiento</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <p class="mb-3">
+                                            <strong th:text="${producto.nombre}"></strong><br>
+                                            <span class="text-secondary small"
+                                                  th:text="'Stock actual: ' + ${producto.stock}"></span>
+                                        </p>
+                                        <div class="mb-3">
+                                            <label class="form-label" th:text="#{movimiento.tipo}">Tipo</label>
+                                            <select name="tipo" class="form-select" required>
+                                                <option th:each="tipo : ${tiposMovimiento}"
+                                                        th:value="${tipo}" th:text="${tipo.descripcion}"></option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" th:text="#{movimiento.cantidad}">Cantidad</label>
+                                            <input type="number" name="cantidad" class="form-control" min="1" step="1" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" th:text="#{movimiento.motivo}">Motivo</label>
+                                            <input type="text" name="motivo" class="form-control" maxlength="255"
+                                                   required placeholder="Ej: Compra a proveedor">
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                                th:text="#{comun.cancelar}">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary"
+                                                th:text="#{comun.guardar}">Guardar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmar desactivacion -->
+                    <div class="modal fade" tabindex="-1" th:id="|desactivar-${producto.idProducto}|">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Desactivar producto</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Desea desactivar el producto <strong th:text="${producto.nombre}"></strong>?
+                                    <p class="text-secondary small mt-2 mb-0">
+                                        No se podrá agregar a pedidos nuevos, pero se conserva su historial.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                            th:text="#{comun.cancelar}">Cancelar</button>
+                                    <form method="post"
+                                          th:action="@{/productos/desactivar/{id}(id=${producto.idProducto})}">
+                                        <button type="submit" class="btn btn-danger"
+                                                th:text="#{comun.desactivar}">Desactivar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </th:block>
+            </th:block>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>
