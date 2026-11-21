@@ -64,6 +64,13 @@ public class ProductoService {
                         "El producto no existe"));
     }
 
+    @Transactional
+    public void actualizarImagenPath(Long id, String imagenPath) {
+        Producto producto = buscarPorId(id);
+        producto.setImagenPath(imagenPath);
+        productoRepository.save(producto);
+    }
+
     // Registro (HU-04) y actualizacion (HU-23)
     @Transactional
     public Producto guardar(Producto datos) {

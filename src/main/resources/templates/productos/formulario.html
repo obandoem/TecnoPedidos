@@ -30,7 +30,8 @@
                     </div>
 
                     <div class="card-body p-4">
-                        <form th:action="@{/productos/guardar}" th:object="${producto}" method="post">
+                        <form th:action="@{/productos/guardar}" th:object="${producto}" method="post"
+                              enctype="multipart/form-data">
 
                             <input type="hidden" th:field="*{idProducto}">
 
@@ -70,6 +71,18 @@
                                           th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid'"></textarea>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}"
                                      th:errors="*{descripcion}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="imagen" class="form-label fw-semibold">Imagen del producto</label>
+                                <div th:if="${imagenActualUrl != null}" class="mb-2">
+                                    <img th:src="${imagenActualUrl}" th:alt="|Imagen de ${producto.nombre}|"
+                                         class="rounded border bg-white p-1"
+                                         style="width: 120px; height: 90px; object-fit: contain;">
+                                </div>
+                                <input type="file" id="imagen" name="imagen" class="form-control"
+                                       accept="image/jpeg,image/png,image/webp">
+                                <div class="form-text">JPG, PNG o WebP; máximo 5 MB. Si no se carga una imagen, se usa una imagen de catálogo.</div>
                             </div>
 
                             <div class="row">

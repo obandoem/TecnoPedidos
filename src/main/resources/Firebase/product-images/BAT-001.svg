@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320">
+ <defs><linearGradient id="b" x2="1" y2="1"><stop stop-color="#475569"/><stop offset="1" stop-color="#1e293b"/></linearGradient></defs>
+ <rect width="480" height="320" rx="24" fill="#eef2f7"/><ellipse cx="240" cy="237" rx="148" ry="17" fill="#cbd5e1"/>
+ <path d="M119 113h242l31 38-17 81H104l-17-81Z" fill="url(#b)" stroke="#64748b" stroke-width="5"/>
+ <path d="m119 113 31-24h170l41 24" fill="#334155" stroke="#64748b" stroke-width="4"/>
+ <rect x="144" y="137" width="192" height="55" rx="7" fill="#0f172a"/><path d="M165 150h63v29h-63zm78 0h72v29h-72z" fill="#334155"/>
+ <path d="M104 151H77v42h27m271-42h28v42h-28" stroke="#d4a64a" stroke-width="8"/><text x="240" y="218" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#e2e8f0">LAPTOP BATTERY</text>
+</svg>

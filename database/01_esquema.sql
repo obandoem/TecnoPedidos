@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS producto (
     stock_minimo INT NOT NULL,
     id_categoria BIGINT NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
+    imagen_path VARCHAR(500),
     version BIGINT NOT NULL DEFAULT 0,
     CONSTRAINT uk_producto_empresa_codigo UNIQUE (id_empresa, codigo),
     CONSTRAINT ck_producto_stock CHECK (stock >= 0),

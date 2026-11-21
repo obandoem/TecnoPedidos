@@ -13,16 +13,17 @@ Aplicación web transaccional multiempresa para PYMEs que venden accesorios y re
 - Thymeleaf (plantillas, fragmentos y archivos de idioma)
 - Bootstrap 5.3 y Bootstrap Icons
 - Spring Data JPA / Hibernate y MySQL 8
+- Firebase Admin SDK: Firebase Storage para imágenes de productos
 - NetBeans como entorno de desarrollo
 
 ## Estructura del proyecto
 
 ```
 src/main/java/com/tecnopedidos/
-├── config/       Seguridad (SeguridadConfig) e idioma (IdiomaConfig)
+├── config/       Seguridad, idioma y Firebase (FirebaseConfig)
 ├── domain/       Entidades JPA, enumeraciones y carrito del pedido
 ├── repository/   Repositorios Spring Data (consultas JPQL)
-├── service/      Reglas de negocio y transacciones
+├── service/      Reglas de negocio, transacciones y FirebaseStorageService
 └── controller/   Controladores MVC
 src/main/resources/
 ├── templates/
@@ -31,6 +32,9 @@ src/main/resources/
 │   ├── login.html  inicio.html  acceso-denegado.html
 │   ├── productos/  categorias/  inventario/  clientes/  pedidos/  tecnico/
 ├── messages.properties / messages_en.properties
+├── Firebase/
+│   ├── tecnopedidos-735e7-fi.json   Credencial de servicio usada por Firebase Admin
+│   └── product-images/              Ilustraciones SVG del catálogo de demostración
 └── application.properties
 database/
 ├── 01_esquema.sql   Creación de la base de datos y las 10 tablas
@@ -41,8 +45,17 @@ database/
 
 1. **Base de datos:** en MySQL Workbench ejecute `database/01_esquema.sql` y luego `database/02_datos.sql`. Para reiniciar desde cero, quite el `--` de la línea `DROP DATABASE` de `01_esquema.sql`.
 2. **Credenciales locales:** copie `src/main/resources/application-local.example.properties` como `application-local.properties` en la misma carpeta y escriba su usuario y contraseña de MySQL. Ese archivo no se sube a GitHub.
-3. **Ejecutar:** abra el proyecto en NetBeans y presione *Run*, o use `mvn spring-boot:run`.
-4. Abra http://localhost:8080 e inicie sesión.
+3. **Firebase Storage:** conserve el archivo de servicio en `src/main/resources/Firebase/tecnopedidos-735e7-fi.json`. `FirebaseConfig` lo carga desde el classpath. El servicio busca el bucket predeterminado del proyecto (`.firebasestorage.app` o `.appspot.com`). Si usa un bucket personalizado, defina `FIREBASE_STORAGE_BUCKET` con el nombre exacto mostrado en Firebase, sin el prefijo `gs://`. En PowerShell: `$env:FIREBASE_STORAGE_BUCKET = "nombre-del-bucket"`.
+4. **Ejecutar:** abra el proyecto en NetBeans y presione *Run*, o use `mvn spring-boot:run`.
+5. Abra http://localhost:8080 e inicie sesión. Al abrir **Inventario** (`/productos`) por primera vez, se cargan en Firebase Storage las ilustraciones del catálogo de demostración.
+
+La cuenta de servicio debe tener permisos para consultar el bucket y leer y escribir objetos. El archivo JSON contiene una llave privada; no la pegues en el README, en el código ni en mensajes o capturas.
+
+### Imágenes de productos
+
+- Los productos de demostración tienen una ilustración SVG correspondiente a su tipo de producto. Se copia a Firebase Storage al consultar el inventario y la interfaz muestra la imagen desde Firebase.
+- Al crear o editar un producto, el formulario permite cargar una imagen propia JPG, PNG o WebP de hasta 5 MB. Al dejar el campo vacío, se muestra una ilustración de catálogo según la categoría.
+- La ruta del objeto de Firebase se guarda en `producto.imagen_path`; Hibernate actualiza la tabla existente con `spring.jpa.hibernate.ddl-auto=update`.
 
 ### Usuarios de prueba (datos ficticios)
 
@@ -95,7 +108,7 @@ Cualquier estado abierto ── Admin cancela ──► CANCELADO (devuelve stoc
 | `rol` | ADMIN, VENDEDOR, TECNICO |
 | `usuario` | Cuentas internas por empresa (contraseña BCrypt) |
 | `categoria` | Categorías del catálogo |
-| `producto` | Catálogo e inventario |
+| `producto` | Catálogo e inventario, incluida la ruta de imagen en Firebase Storage |
 | `movimiento_inventario` | Entradas, ajustes, salidas y devoluciones (trazabilidad del stock) |
 | `cliente` | Clientes de cada empresa |
 | `pedido` | Pedidos (tabla transaccional) |
@@ -137,7 +150,7 @@ Cualquier estado abierto ── Admin cancela ──► CANCELADO (devuelve stoc
 | HU-13 Seguimiento público con código | Pendiente |
 | HU-17 Notificaciones por correo (Spring Mail) | Pendiente |
 | HU-19 Exportar inventario CSV | Pendiente |
-| HU-20 Imágenes de productos (Firebase) | Pendiente |
+| HU-20 Imágenes de productos (Firebase) | ✔ Implementada: imágenes del catálogo y carga de imágenes JPG, PNG y WebP |
 
 ## Navegación (coherente con el prototipo)
 

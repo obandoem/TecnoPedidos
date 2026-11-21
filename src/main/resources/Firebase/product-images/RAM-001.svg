@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320">
+ <defs><linearGradient id="r" x2="1"><stop stop-color="#111827"/><stop offset="1" stop-color="#334155"/></linearGradient></defs>
+ <rect width="480" height="320" rx="24" fill="#eef2f7"/><ellipse cx="240" cy="226" rx="152" ry="17" fill="#cbd5e1"/>
+ <g transform="rotate(-7 240 154)"><rect x="82" y="119" width="316" height="76" rx="9" fill="url(#r)" stroke="#64748b" stroke-width="4"/>
+ <rect x="111" y="131" width="48" height="49" rx="4" fill="#0f172a" stroke="#475569" stroke-width="3"/><rect x="172" y="131" width="48" height="49" rx="4" fill="#0f172a" stroke="#475569" stroke-width="3"/><rect x="233" y="131" width="48" height="49" rx="4" fill="#0f172a" stroke="#475569" stroke-width="3"/><rect x="294" y="131" width="48" height="49" rx="4" fill="#0f172a" stroke="#475569" stroke-width="3"/>
+ <path d="M102 195v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21m18-21v21" stroke="#d4a64a" stroke-width="5"/></g>
+ <path d="M103 110h274" stroke="#22d3ee" stroke-width="5" stroke-linecap="round"/><text x="240" y="270" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#475569">DDR4 · 16 GB · 3200 MHz</text>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320">
+ <defs><linearGradient id="s" x2="1"><stop stop-color="#0f172a"/><stop offset="1" stop-color="#334155"/></linearGradient></defs>
+ <rect width="480" height="320" rx="24" fill="#eef2f7"/><ellipse cx="242" cy="237" rx="147" ry="18" fill="#cbd5e1"/>
+ <g transform="rotate(-12 240 158)"><rect x="89" y="108" width="302" height="97" rx="12" fill="url(#s)"/><circle cx="109" cy="128" r="6" fill="#cbd5e1"/><circle cx="371" cy="184" r="6" fill="#cbd5e1"/>
+ <rect x="132" y="126" width="95" height="57" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="3"/><rect x="242" y="126" width="102" height="57" rx="5" fill="#1e293b" stroke="#64748b" stroke-width="3"/>
+ <path d="M124 205v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18m15-18v18" stroke="#d4a64a" stroke-width="5"/></g>
+ <text x="240" y="278" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#475569">NVMe · 1 TB</text>
+</svg>

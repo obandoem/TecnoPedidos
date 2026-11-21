@@ -7,3 +7,4 @@ nbproject/private/
 
 # Configuracion local con credenciales (no se versiona)
 src/main/resources/application-local.properties
+/src/main/resources/Firebase/tecnopedidos-735e7-fi.json

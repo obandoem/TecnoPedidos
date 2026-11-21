@@ -109,8 +109,14 @@
 
                                 <td class="ps-3">
                                     <div class="d-flex align-items-center">
-                                        <span class="bg-body-secondary rounded-2 d-inline-flex align-items-center justify-content-center me-2"
-                                              style="width: 36px; height: 36px;"><i class="bi bi-box text-secondary"></i></span>
+                                        <img th:if="${imagenes[producto.idProducto] != null}"
+                                             th:src="${imagenes[producto.idProducto]}"
+                                             th:alt="|Imagen de ${producto.nombre}|"
+                                             class="rounded-2 me-2 border bg-white"
+                                             style="width: 54px; height: 54px; object-fit: contain;">
+                                        <span th:unless="${imagenes[producto.idProducto] != null}"
+                                              class="bg-body-secondary rounded-2 d-inline-flex align-items-center justify-content-center me-2"
+                                              style="width: 54px; height: 54px;"><i class="bi bi-box text-secondary"></i></span>
                                         <div class="lh-sm">
                                             <div class="fw-semibold" th:text="${producto.nombre}"></div>
                                             <code class="small" th:text="${producto.codigo}"></code>
@@ -209,7 +215,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                 </div>
 
-                <form th:action="@{/productos/guardar}" method="post" class="d-flex flex-column flex-grow-1">
+                <form th:action="@{/productos/guardar}" method="post" enctype="multipart/form-data" class="d-flex flex-column flex-grow-1">
                     <div class="offcanvas-body">
 
                         <div th:if="${#lists.isEmpty(categoriasActivas)}" class="alert alert-warning">
@@ -234,6 +240,12 @@
                                 <label for="nuevoNombre" class="form-label fw-semibold" th:text="#{producto.nombre}">Producto</label>
                                 <input type="text" id="nuevoNombre" name="nombre" class="form-control"
                                        maxlength="120" required placeholder="Ej: Teclado mecánico RGB">
+                            </div>
+                            <div class="col-12">
+                                <label for="nuevaImagen" class="form-label fw-semibold">Imagen del producto</label>
+                                <input type="file" id="nuevaImagen" name="imagen" class="form-control"
+                                       accept="image/jpeg,image/png,image/webp">
+                                <div class="form-text">JPG, PNG o WebP; máximo 5 MB. Si se deja vacío, se usa una imagen de catálogo.</div>
                             </div>
                             <div class="col-6">
                                 <label for="nuevoPrecio" class="form-label fw-semibold">Precio (₡)</label>

@@ -63,6 +63,10 @@ public class Producto {
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
+    @Size(max = 500)
+    @Column(name = "imagen_path", length = 500)
+    private String imagenPath;
+
     // Bloqueo optimista: si dos usuarios modifican el mismo producto a la vez,
     // el segundo cambio se rechaza en lugar de sobrescribir el stock (HU-06 esc. 4)
     @Version
@@ -175,6 +179,14 @@ public class Producto {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public String getImagenPath() {
+        return imagenPath;
+    }
+
+    public void setImagenPath(String imagenPath) {
+        this.imagenPath = imagenPath;
     }
 
     public Long getVersion() {

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320">
+ <defs><linearGradient id="p" x2="1"><stop stop-color="#cbd5e1"/><stop offset="1" stop-color="#f8fafc"/></linearGradient></defs>
+ <rect width="480" height="320" rx="24" fill="#eef2f7"/><ellipse cx="240" cy="244" rx="105" ry="15" fill="#cbd5e1"/>
+ <path d="M169 125h142l-14 92c-2 13-12 22-25 22h-64c-13 0-23-9-25-22Z" fill="url(#p)" stroke="#94a3b8" stroke-width="4"/>
+ <path d="M190 126V96c0-9 7-16 16-16h68c9 0 16 7 16 16v30" fill="#f8fafc" stroke="#94a3b8" stroke-width="4"/>
+ <path d="M204 80V59h72v21" fill="#334155"/><path d="M223 59V44h34v15" fill="#0f172a"/>
+ <rect x="187" y="152" width="106" height="48" rx="7" fill="#dbeafe"/><text x="240" y="174" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#1e3a8a">THERMAL</text><text x="240" y="190" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#475569">4 g</text>
+</svg>
