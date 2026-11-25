@@ -11,6 +11,7 @@ import com.tecnopedidos.domain.TipoMovimiento;
 import com.tecnopedidos.repository.PedidoRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,11 @@ public class PedidoService {
     private final ClienteService clienteService;
     private final MovimientoInventarioService movimientoService;
     private final EmpresaActualService empresaActual;
+    
+    
+    // Letras y numeros faciles de leer (sin O, 0, I, 1, L para no confundirse)
+    private static final String CARACTERES_CODIGO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    private final SecureRandom random = new SecureRandom();
 
     public PedidoService(PedidoRepository pedidoRepository,
                          ProductoService productoService,
@@ -108,6 +114,20 @@ public class PedidoService {
             throw new IllegalArgumentException("La cantidad debe ser un numero entero mayor que cero");
         }
     }
+    
+    
+    // Genera un codigo como TP-8F3K2A y revisa que no exista en la BD (HU-13)
+    private String generarCodigoSeguimiento() {
+        String codigo;
+        do {
+            StringBuilder sb = new StringBuilder("TP-");
+            for (int i = 0; i < 6; i++) {
+                sb.append(CARACTERES_CODIGO.charAt(random.nextInt(CARACTERES_CODIGO.length())));
+            }
+            codigo = sb.toString();
+        } while (pedidoRepository.existsByCodigoSeguimiento(codigo));
+        return codigo;
+    }
 
     // Lineas con el precio vigente del catalogo, calculadas en el servidor (HU-07 esc. 2).
     // Son objetos de vista: no se guardan.
@@ -173,7 +193,8 @@ public class PedidoService {
         pedido.setRequiereAsistencia(carrito.isRequiereAsistencia());
         pedido.setEstado(EstadoPedido.PENDIENTE);
         pedido.setFechaCreacion(LocalDateTime.now());
-
+        pedido.setCodigoSeguimiento(generarCodigoSeguimiento());
+        
         // Detalles con el precio vigente; se valida el stock antes de escribir
         for (Map.Entry<Long, Integer> entrada : carrito.getLineas().entrySet()) {
 

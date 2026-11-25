@@ -44,4 +44,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     long countByEmpresa_IdEmpresaAndEstadoNotIn(Long idEmpresa, Collection<EstadoPedido> estados);
 
     List<Pedido> findTop5ByEmpresa_IdEmpresaOrderByFechaCreacionDescIdPedidoDesc(Long idEmpresa);
+
+    // Revisa que el codigo de seguimiento no se repita (HU-13)
+    boolean existsByCodigoSeguimiento(String codigoSeguimiento);
 }
