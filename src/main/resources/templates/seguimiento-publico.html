@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head('Seguimiento de pedido')}"></head>
+
+<!-- Seguimiento publico del pedido (P10 / HU-13) -->
+<body class="bg-light">
+<div class="container py-5" style="max-width: 720px;">
+
+    <!-- Encabezado con la marca y el cambio de idioma -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-2">
+            <span class="bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center"
+                  style="width: 40px; height: 40px;">
+                <i class="bi bi-grid-fill"></i>
+            </span>
+            <span class="fs-5 fw-semibold">TecnoPedidos</span>
+        </div>
+        <th:block th:replace="~{layout/plantilla :: idioma}"></th:block>
+    </div>
+
+    <!-- Formulario para escribir el codigo -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h1 class="h4 mb-1">Consulta el estado de tu pedido</h1>
+            <p class="text-secondary">Escribe el código de seguimiento que te dio la tienda.</p>
+
+            <form th:action="@{/seguimiento-publico}" method="get" class="d-flex gap-2">
+                <input type="text" name="codigo" class="form-control text-uppercase"
+                       th:value="${codigo}" placeholder="TP-XXXXXX" maxlength="12" required>
+                <button type="submit" class="btn btn-primary text-nowrap">
+                    <i class="bi bi-search me-1"></i>Consultar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Codigo que no existe -->
+    <div th:if="${noEncontrado}" class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        No encontramos un pedido con ese código. Revísalo e intenta de nuevo.
+    </div>
+
+    <!-- Resultado: solo datos publicos (sin datos del cliente ni notas internas) -->
+    <div th:if="${pedido != null}" class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <div class="text-secondary small" th:text="${pedido.empresa.nombre}">Empresa</div>
+                    <h2 class="h5 mb-0" th:text="${pedido.codigoSeguimiento}">TP-XXXXXX</h2>
+                    <div class="text-secondary small"
+                         th:text="'Registrado el ' + ${#temporals.format(pedido.fechaCreacion, 'dd/MM/yyyy')}">
+                        Registrado el 01/01/2026</div>
+                </div>
+                <span class="badge text-bg-primary fs-6" th:text="${pedido.estado}">PENDIENTE</span>
+            </div>
+
+            <h3 class="h6 mt-4 mb-2">Historial del pedido</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item px-0" th:each="s : ${pedido.seguimientos}">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold" th:text="${s.estadoNuevo}">ESTADO</span>
+                        <span class="text-secondary small"
+                              th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
+                    </div>
+                    <div class="text-secondary small" th:if="${s.comentarioPublico != null}"
+                         th:text="${s.comentarioPublico}">Comentario</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a th:href="@{/login}" class="small">Ingresar al sistema</a>
+    </div>
+</div>
+
+<th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+</body>
+</html>

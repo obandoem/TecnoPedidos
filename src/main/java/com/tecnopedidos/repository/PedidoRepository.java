@@ -47,4 +47,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     // Revisa que el codigo de seguimiento no se repita (HU-13)
     boolean existsByCodigoSeguimiento(String codigoSeguimiento);
+    
+    // Busca el pedido por su codigo para la consulta publica (HU-13)
+    Optional<Pedido> findByCodigoSeguimiento(String codigoSeguimiento);
 }

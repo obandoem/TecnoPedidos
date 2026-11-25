@@ -23,8 +23,8 @@ public class SeguridadConfig {
 
         http
             .authorizeHttpRequests(auth -> auth
-                // Publicas
-                .requestMatchers("/login", "/error", "/acceso-denegado").permitAll()
+                // Publicas (incluye la consulta del pedido con codigo, HU-13)
+                .requestMatchers("/login", "/error", "/acceso-denegado", "/seguimiento-publico").permitAll()
 
                 // Tecnico: solo su bandeja y sus avances (HU-09, HU-25)
                 .requestMatchers("/tecnico/**").hasRole("TECNICO")
