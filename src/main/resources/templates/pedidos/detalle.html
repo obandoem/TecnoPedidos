@@ -102,6 +102,22 @@
 
                 <!-- Acciones segun el rol y el estado -->
                 <div class="col-lg-4">
+                    
+                    <!-- Codigo QR para que el cliente consulte su pedido (HU-13) -->
+                    <div class="card shadow-sm border-0 mb-3 text-center" th:if="${qrSeguimiento != null}">
+                        <div class="card-body">
+                            <h6 class="fw-semibold" th:text="#{qr.titulo}">Seguimiento para el cliente</h6>
+                            <img th:src="'data:image/png;base64,' + ${qrSeguimiento}"
+                                 alt="QR" class="img-fluid my-2" style="max-width: 200px;">
+                            <div class="fs-5 fw-bold font-monospace" th:text="${pedido.codigoSeguimiento}">TP-XXXXXX</div>
+                            <p class="small text-secondary mt-2" th:text="#{qr.instruccion}">
+                                El cliente escanea este código con el celular para ver el avance de su pedido.</p>
+                            <a th:href="${enlaceSeguimiento}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-box-arrow-up-right me-1"></i><span th:text="#{qr.abrir}">Abrir página de seguimiento</span>
+                            </a>
+                        </div>
+                    </div>
+                    
 
                     <!-- Asignar o reasignar tecnico (HU-08) - administrador -->
                     <div class="card shadow-sm border-0 mb-3" th:if="${esAdmin and pedido.asignable}">
