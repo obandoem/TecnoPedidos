@@ -29,6 +29,7 @@ public class PedidoService {
     private final ClienteService clienteService;
     private final MovimientoInventarioService movimientoService;
     private final EmpresaActualService empresaActual;
+    private final CorreoService correoService;
 
     // Letras y numeros faciles de leer (sin O, 0, I, 1, L para no confundirse)
     private static final String CARACTERES_CODIGO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -38,12 +39,14 @@ public class PedidoService {
                          ProductoService productoService,
                          ClienteService clienteService,
                          MovimientoInventarioService movimientoService,
-                         EmpresaActualService empresaActual) {
+                         EmpresaActualService empresaActual,
+                         CorreoService correoService) {
         this.pedidoRepository = pedidoRepository;
         this.productoService = productoService;
         this.clienteService = clienteService;
         this.movimientoService = movimientoService;
         this.empresaActual = empresaActual;
+        this.correoService = correoService;
     }
 
     // ------------------------------------------------------------------
@@ -276,8 +279,10 @@ public class PedidoService {
     // Historial
     // ------------------------------------------------------------------
 
+    
     // Agrega un registro al historial del pedido con el usuario y la fecha.
     // Tambien lo usa SeguimientoService para asignaciones y avances.
+    // Si el estado cambio, avisa al cliente por correo (HU-17).
     void registrarSeguimiento(Pedido pedido, EstadoPedido anterior, EstadoPedido nuevo,
                               String comentarioPublico, String observacionInterna) {
 
@@ -291,5 +296,10 @@ public class PedidoService {
         seguimiento.setFecha(LocalDateTime.now());
 
         pedido.agregarSeguimiento(seguimiento);
+
+        // Solo se avisa cuando el estado cambia (un avance sin cambio de estado no manda correo)
+        if (nuevo != null && nuevo != anterior) {
+            correoService.avisarCambioEstado(pedido, nuevo, comentarioPublico);
+        }
     }
 }
