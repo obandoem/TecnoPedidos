@@ -63,6 +63,13 @@
                     </div>
                     <button type="submit" class="btn btn-primary w-100" th:text="#{login.ingresar}">Ingresar</button>
                 </form>
+                
+                <!-- Acceso a la consulta publica del pedido (P10 / HU-13) -->
+                <div class="text-center mt-4">
+                    <a th:href="@{/seguimiento-publico}" class="small">
+                                               <i class="bi bi-search me-1"></i><span th:text="#{seguimiento.enlaceLogin}">¿Tienes un código? Consulta tu pedido</span>
+                    </a>
+                </div>
             </div>
         </div>
 

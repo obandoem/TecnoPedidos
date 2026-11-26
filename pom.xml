@@ -53,6 +53,24 @@
             <artifactId>firebase-admin</artifactId>
             <version>9.12.0</version>
         </dependency>
+
+        <!-- ZXing (Google): genera el codigo QR del seguimiento (HU-13, tecnologia investigada) -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+
+        <!-- Spring Mail: aviso por correo al cliente cuando cambia el estado (HU-17) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

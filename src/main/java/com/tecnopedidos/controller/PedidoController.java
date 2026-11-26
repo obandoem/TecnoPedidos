@@ -5,6 +5,7 @@ import com.tecnopedidos.domain.DetallePedido;
 import com.tecnopedidos.domain.EstadoPedido;
 import com.tecnopedidos.domain.Pedido;
 import com.tecnopedidos.service.ClienteService;
+import com.tecnopedidos.service.CodigoQrService;
 import com.tecnopedidos.service.PedidoService;
 import com.tecnopedidos.service.ProductoService;
 import com.tecnopedidos.service.SeguimientoService;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 // Pedidos: listado (P06), nuevo pedido con carrito (P05), detalle y acciones
 @Controller
@@ -26,16 +28,19 @@ public class PedidoController {
     private final PedidoService pedidoService;
     private final SeguimientoService seguimientoService;
     private final ClienteService clienteService;
-    private final ProductoService productoService;
+        private final ProductoService productoService;
+    private final CodigoQrService codigoQrService;
 
     public PedidoController(PedidoService pedidoService,
                             SeguimientoService seguimientoService,
                             ClienteService clienteService,
-                            ProductoService productoService) {
+                            ProductoService productoService,
+                            CodigoQrService codigoQrService) {
         this.pedidoService = pedidoService;
         this.seguimientoService = seguimientoService;
         this.clienteService = clienteService;
         this.productoService = productoService;
+        this.codigoQrService = codigoQrService;
     }
 
     // El carrito vive en la sesion del usuario hasta confirmar el pedido
@@ -148,11 +153,25 @@ public class PedidoController {
     // Detalle y acciones
     // ------------------------------------------------------------------
 
-    @GetMapping("/{id}")
+       @GetMapping("/{id}")
     public String detalle(@PathVariable Long id, Model model, RedirectAttributes redirect) {
         try {
-            model.addAttribute("pedido", pedidoService.buscarPorId(id));
+            Pedido pedido = pedidoService.buscarPorId(id);
+            model.addAttribute("pedido", pedido);
             model.addAttribute("tecnicos", seguimientoService.tecnicosDisponibles());
+
+            // Codigo QR con el enlace a la consulta publica (HU-13), por ejemplo:
+            // http://localhost:8080/seguimiento-publico?codigo=TP-UZR3J7
+            if (pedido.getCodigoSeguimiento() != null) {
+                String enlace = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/seguimiento-publico")
+                        .queryParam("codigo", pedido.getCodigoSeguimiento())
+                        .toUriString();
+
+                model.addAttribute("enlaceSeguimiento", enlace);
+                model.addAttribute("qrSeguimiento", codigoQrService.generarQrBase64(enlace, 220));
+            }
+
             return "pedidos/detalle";
 
         } catch (IllegalArgumentException e) {

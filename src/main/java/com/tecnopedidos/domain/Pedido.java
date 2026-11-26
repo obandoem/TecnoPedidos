@@ -49,6 +49,11 @@ public class Pedido {
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
+    
+    
+    // Codigo para que el cliente consulte su pedido sin iniciar sesion (HU-13)
+    @Column(name = "codigo_seguimiento", unique = true, length = 12)
+    private String codigoSeguimiento;
 
     // Relacion uno a muchos: un pedido tiene varias lineas de detalle
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -170,6 +175,15 @@ public class Pedido {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+    
+    
+    public String getCodigoSeguimiento() {
+        return codigoSeguimiento;
+    }
+
+    public void setCodigoSeguimiento(String codigoSeguimiento) {
+        this.codigoSeguimiento = codigoSeguimiento;
     }
 
     public List<DetallePedido> getDetalles() {

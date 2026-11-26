@@ -11,14 +11,16 @@ import com.tecnopedidos.domain.TipoMovimiento;
 import com.tecnopedidos.repository.PedidoRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// Registro, consulta y cancelacion de pedidos (HU-06, HU-07, HU-24)
+// Registro, consulta y cancelacion de pedidos (HU-06, HU-07, HU-13, HU-24)
 @Service
 public class PedidoService {
 
@@ -27,17 +29,24 @@ public class PedidoService {
     private final ClienteService clienteService;
     private final MovimientoInventarioService movimientoService;
     private final EmpresaActualService empresaActual;
+    private final CorreoService correoService;
+
+    // Letras y numeros faciles de leer (sin O, 0, I, 1, L para no confundirse)
+    private static final String CARACTERES_CODIGO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    private final SecureRandom random = new SecureRandom();
 
     public PedidoService(PedidoRepository pedidoRepository,
                          ProductoService productoService,
                          ClienteService clienteService,
                          MovimientoInventarioService movimientoService,
-                         EmpresaActualService empresaActual) {
+                         EmpresaActualService empresaActual,
+                         CorreoService correoService) {
         this.pedidoRepository = pedidoRepository;
         this.productoService = productoService;
         this.clienteService = clienteService;
         this.movimientoService = movimientoService;
         this.empresaActual = empresaActual;
+        this.correoService = correoService;
     }
 
     // ------------------------------------------------------------------
@@ -59,6 +68,15 @@ public class PedidoService {
     public List<Pedido> recientes() {
         return pedidoRepository
                 .findTop5ByEmpresa_IdEmpresaOrderByFechaCreacionDescIdPedidoDesc(empresaActual.getIdEmpresa());
+    }
+
+    // Consulta publica por codigo de seguimiento, sin iniciar sesion (HU-13)
+    @Transactional(readOnly = true)
+    public Optional<Pedido> buscarPorCodigoSeguimiento(String codigo) {
+        if (codigo == null || codigo.isBlank()) {
+            return Optional.empty();
+        }
+        return pedidoRepository.findByCodigoSeguimiento(codigo.trim().toUpperCase());
     }
 
     // Pendientes de entrega: todos los abiertos (HU-18 esc. 2)
@@ -107,6 +125,19 @@ public class PedidoService {
         if (cantidad == null || cantidad <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser un numero entero mayor que cero");
         }
+    }
+
+    // Genera un codigo como TP-8F3K2A y revisa que no exista en la BD (HU-13)
+    private String generarCodigoSeguimiento() {
+        String codigo;
+        do {
+            StringBuilder sb = new StringBuilder("TP-");
+            for (int i = 0; i < 6; i++) {
+                sb.append(CARACTERES_CODIGO.charAt(random.nextInt(CARACTERES_CODIGO.length())));
+            }
+            codigo = sb.toString();
+        } while (pedidoRepository.existsByCodigoSeguimiento(codigo));
+        return codigo;
     }
 
     // Lineas con el precio vigente del catalogo, calculadas en el servidor (HU-07 esc. 2).
@@ -173,6 +204,7 @@ public class PedidoService {
         pedido.setRequiereAsistencia(carrito.isRequiereAsistencia());
         pedido.setEstado(EstadoPedido.PENDIENTE);
         pedido.setFechaCreacion(LocalDateTime.now());
+        pedido.setCodigoSeguimiento(generarCodigoSeguimiento());
 
         // Detalles con el precio vigente; se valida el stock antes de escribir
         for (Map.Entry<Long, Integer> entrada : carrito.getLineas().entrySet()) {
@@ -247,8 +279,10 @@ public class PedidoService {
     // Historial
     // ------------------------------------------------------------------
 
+    
     // Agrega un registro al historial del pedido con el usuario y la fecha.
     // Tambien lo usa SeguimientoService para asignaciones y avances.
+    // Si el estado cambio, avisa al cliente por correo (HU-17).
     void registrarSeguimiento(Pedido pedido, EstadoPedido anterior, EstadoPedido nuevo,
                               String comentarioPublico, String observacionInterna) {
 
@@ -262,5 +296,10 @@ public class PedidoService {
         seguimiento.setFecha(LocalDateTime.now());
 
         pedido.agregarSeguimiento(seguimiento);
+
+        // Solo se avisa cuando el estado cambia (un avance sin cambio de estado no manda correo)
+        if (nuevo != null && nuevo != anterior) {
+            correoService.avisarCambioEstado(pedido, nuevo, comentarioPublico);
+        }
     }
 }
